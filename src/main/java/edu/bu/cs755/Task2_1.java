@@ -20,7 +20,7 @@ import java.io.IOException;
 
 public class Task2_1 {
 
-    public static class SortMedallionErrors extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+    public static class SortMedallionErrors extends Mapper<LongWritable, Text, DoubleWritable, Text> {
 
         PriorityQueue<Map.Entry<Text, DoubleWritable>> q = new PriorityQueue<>(500, new Comparator<Map.Entry<Text, DoubleWritable>>() {
             @Override
@@ -68,18 +68,18 @@ public class Task2_1 {
                 System.out.println("CLEANUP \n --PEEKING AT Q---");
                 System.out.println(q.peek());
 
-                context.write(q.peek().getKey(), q.peek().getValue());
+                context.write(q.peek().getValue(), q.peek().getKey());
                 q.remove();
             }
         }
     }
 
-    public static class MedallionErrorRateReducer extends Reducer<Text,DoubleWritable,Text,DoubleWritable> {
-        public void reduce(Text key, Iterable<DoubleWritable> values,
+    public static class MedallionErrorRateReducer extends Reducer<DoubleWritable,Text,Text,DoubleWritable> {
+        public void reduce(DoubleWritable key, Iterable<Text> values,
                            Context context
         ) throws IOException, InterruptedException {
-            for (DoubleWritable val : values) {
-                context.write(key, val);
+            for (Text val : values) {
+                context.write(val, key);
             }
         }
     }
@@ -87,10 +87,10 @@ public class Task2_1 {
         Configuration conf = new Configuration();
         Job job =  new Job(conf, "task2.1");
         job.setJarByClass(Task2_1.class);
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(DoubleWritable.class);
+        job.setMapOutputKeyClass(DoubleWritable.class);
+        job.setMapOutputValueClass(Text.class);
         job.setMapperClass(Task2_1.SortMedallionErrors.class);
-        //job.setReducerClass(Task2_1.MedallionErrorRateReducer.class);
+        job.setReducerClass(Task2_1.MedallionErrorRateReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(DoubleWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));

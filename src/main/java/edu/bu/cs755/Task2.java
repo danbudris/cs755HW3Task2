@@ -54,6 +54,7 @@ public class Task2 {
                 // increment the error counter; non-errors are equal to 0, errors equal to 1
                 errSum += val.get();
             }
+            double answer = new Double(errSum/totalSum);
             /* Print lines for debugging
             System.out.println(key);
             System.out.println("ErrSum" + Double.toString(errSum));
@@ -61,8 +62,10 @@ public class Task2 {
             System.out.println("ErrPercentage" + Double.toString(errSum/totalSum));
             */
             // set the result to the percentage of error records in the total records for the given medallion number
-            result.set(errSum/totalSum);
-            context.write(key, result);
+            if (answer != 0) {
+                result.set(answer);
+                context.write(key, result);
+            }
         }
     }
 
